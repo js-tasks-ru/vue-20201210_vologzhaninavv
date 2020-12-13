@@ -7,4 +7,9 @@
  */
 export function sum(a, b) {
   // Решение
+  if (a !== a || b !== b) {
+    return '';
+  }
+
+  return a + b;
 }
