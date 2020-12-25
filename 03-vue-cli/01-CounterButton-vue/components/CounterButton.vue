@@ -2,7 +2,6 @@
   <div>
     <button
       type="button"
-      :count="count"
       @click="increment">{{ count }}</button>
   </div>
 </template>
