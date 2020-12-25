@@ -1,7 +1,34 @@
-<template><div></div></template>
+<template>
+  <div>
+    <button
+      type="button"
+      :count="count"
+      @click="increment">{{ count }}</button>
+  </div>
+</template>
 
 <script>
-export default {};
+export default {
+  name: 'CounterButton',
+
+  model: {
+    prop: 'count',
+    event: 'increment'
+  },
+
+  props: {
+    count: {
+      type: Number,
+      default: 0
+    }
+  },
+
+  methods: {
+    increment() {
+      return this.$emit('increment', this.count + 1);
+    }
+  }
+};
 </script>
 
 <style></style>
