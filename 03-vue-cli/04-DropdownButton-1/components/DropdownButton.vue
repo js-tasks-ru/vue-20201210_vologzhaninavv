@@ -72,44 +72,37 @@ export default {
     return {
       // состояние выпадающего списка
       show: false,
-      classes: {
-        button: {},
-        item: {}
-      }
     };
   },
 
   computed: {
     // данные кнопки для вывода
     dataButton() {
-      let selectedOption = this.options.find((option) => option.value === this.value);
-
-      if (selectedOption) {
-        return {
-          title: `${this.title} - ${selectedOption.text}`,
-          icon: selectedOption.icon
-        };
-      }
-
-      return {
+      const selectedOption = this.options.find((option) => option.value === this.value);
+      let dataButton = {
         title: this.title,
         icon: null
       };
+
+      if (selectedOption) {
+        dataButton.title = `${this.title} - ${selectedOption.text}`;
+        dataButton.icon = selectedOption.icon;
+      }
+
+      return dataButton;
+    },
+    classes() {
+      const withIcon = this.options.some((option) => option.icon);
+
+      return {
+        button: {
+          dropdown__toggle_icon: withIcon
+        },
+        item: {
+          dropdown__item_icon: withIcon
+        }
+      };
     }
-  },
-
-  created() {
-    const withIcon = this.options.some((option) => option.icon);
-
-    // вычисляемые классы для кнопки
-    this.classes.button = {
-      dropdown__toggle_icon: withIcon
-    };
-
-    // общие вычисляемые классы элементов выпад.списка
-    this.classes.item = {
-      dropdown__item_icon: withIcon
-    };
   },
 
   methods: {
