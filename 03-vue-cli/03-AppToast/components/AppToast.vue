@@ -1,12 +1,13 @@
 <template>
   <div class="toasts">
-    <div class="toast toast_success">
-      <app-icon icon="check-circle" />
-      <span>Success</span>
-    </div>
-    <div class="toast toast_error">
-      <app-icon icon="alert-circle" />
-      <span>Error</span>
+    <div
+      v-for="toast in toasts"
+      :key="toast.id"
+      class="toast"
+      :class="`toast_${toast.type}`"
+    >
+      <app-icon :icon="toast.icon" />
+      <span>{{ toast.message }}</span>
     </div>
   </div>
 </template>
@@ -21,10 +22,47 @@ export default {
 
   components: { AppIcon },
 
-  methods: {
-    error(message) {},
+  data() {
+    return {
+      // список сообщений
+      toasts: {},
+      // ид нового добавляемого сообщения
+      toastId: 0
+    }
+  },
 
-    success(message) {},
+  methods: {
+    // вывести сообщение об ошибке
+    error(message) {
+      this.createToast({type: "error", icon: 'alert-circle', message});
+    },
+
+    // вывести сообщение об успехе
+    success(message) {
+      this.createToast({type: "success", icon: 'check-circle', message});
+    },
+
+    createToast({type = null, icon = null, message = null}) {
+      // узнать ид для нового сообщения
+      let newToastId = ++this.toastId;
+
+      // добавить параметры нового сообщения
+      this.toasts[newToastId] = {
+        id: newToastId,
+        type: type,
+        icon: icon,
+        message: message
+      };
+
+      // обновить спиок сообщений во Vue
+      this.toasts = Object.assign({}, this.toasts);
+
+      // удалить сообщение из списка после DELAY ms
+      setTimeout(() => {
+        delete this.toasts[newToastId];
+        this.toasts = Object.assign({}, this.toasts);
+      }, DELAY);
+    }
   },
 };
 </script>
