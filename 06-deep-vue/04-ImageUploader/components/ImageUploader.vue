@@ -1,24 +1,101 @@
 <template>
   <div class="image-uploader">
     <label
-      class="image-uploader__preview image-uploader__preview-loading"
-      :style="`--bg-image: url('https://course-vue.javascript.ru/api/images/1')`"
+      class="image-uploader__preview"
+      :class="{'image-uploader__preview-loading': loading}"
+      :style="bgStyle"
     >
-      <span>Удалить изображение</span>
+      <span>{{ label }}</span>
       <input
         type="file"
         accept="image/*"
         class="form-control-file"
+        :disabled="loading"
+        @click="resetImage"
+        @change="change"
       />
     </label>
   </div>
 </template>
 
 <script>
-// import { ImageService } from '../image-service';
+import { ImageService } from '../image-service';
 
 export default {
   name: 'ImageUploader',
+
+  model: {
+    prop: 'imageId',
+    event: 'change'
+  },
+
+  props: {
+    imageId: {
+      type: Number,
+      default: null
+    }
+  },
+
+  data() {
+    return {
+      loading: false
+    }
+  },
+
+  computed: {
+    bgStyle() {
+      let bgStyle = {};
+
+      // если есть ид изображения, то вывыдем его фоном
+      if (this.imageId !== null) {
+        bgStyle = {
+          '--bg-image': `url('${ImageService.getImageURL(this.imageId)}')`
+        };
+      }
+
+      return bgStyle;
+    },
+    label() {
+      if (this.loading) {
+        return 'Загрузка...';
+      }
+
+      if (this.imageId !== null) {
+        return 'Удалить изображение';
+      }
+
+      return 'Загрузить изображение';
+    }
+  },
+
+  methods: {
+    change($event) {
+      const files = $event.target.files;
+      if (!(files && files[0])) {
+        return;
+      }
+
+      this.loading = true;
+
+      ImageService.uploadImage(files[0])
+        .then(image => {
+          const imageId = (image.id || image.id === 0) ? image.id : null;
+          this.$emit('change', imageId);
+        })
+        .finally(() => {
+          this.loading = false;
+        });
+    },
+
+    resetImage($event) {
+      // если уже выбрано изображение, то сбросить его
+      if (this.imageId) {
+        $event.preventDefault();
+        $event.target.value = null;
+        this.$emit('change', null);
+      }
+    }
+  }
 };
 </script>
 
