@@ -1,6 +1,6 @@
 <template>
   <main>
-    <messages-list class="messages" :messages="messages" />
+    <messages-list class="messages" :messages="messages" ref="messages" />
     <form @submit.prevent="send" style="display: flex;">
       <input type="text" placeholder="New message" v-model="newMessage" />
       <button>Send</button>
@@ -36,8 +36,18 @@ export default {
         id: id++,
         text: this.newMessage,
       });
+
       this.newMessage = '';
+
+      this.scrollMessages();
     },
+    scrollMessages() {
+      const messagesEl = this.$refs['messages'].$el;
+
+      this.$nextTick(() => {
+        messagesEl.scrollTop = messagesEl.scrollHeight - messagesEl.clientHeight;
+      });
+    }
   },
 };
 </script>
