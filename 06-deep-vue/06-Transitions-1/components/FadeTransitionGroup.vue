@@ -1,4 +1,13 @@
-<template></template>
+<template>
+  <transition-group
+    v-bind="$attrs"
+    v-on="$listeners"
+    class="fade-list"
+    name="fade-list"
+  >
+    <slot name="default" />
+  </transition-group>
+</template>
 
 <script>
 export default {
@@ -11,22 +20,22 @@ export default {
   position: relative;
 }
 
-.fade-list > * {
+.fade-list >>> * {
   transition: all 0.3s ease-out;
 }
 
-.fade-list-leave-active {
+>>> .fade-list-leave-active {
   position: absolute !important;
   left: 0;
   right: 0;
 }
 
-.fade-list-enter,
-.fade-list-leave-to {
+>>> .fade-list-enter,
+>>> .fade-list-leave-to {
   opacity: 0;
 }
 
-.fade-list-move {
+>>> .fade-list-move {
   transition: transform 0.3s;
 }
 </style>
