@@ -2,7 +2,7 @@
   <AppInput
     v-bind="$attrs"
     v-on="listeners"
-    ref="appInput"
+    @input.native="inputNative"
     :type="type"
     :value="valueInput"
   >
@@ -40,7 +40,6 @@ export default {
     valueAsDate: {
       type: Date
     },
-    // Чтобы value не было в списке $attrs, его можно указать в списке параметров
     value: {
       type: String
     },
@@ -51,12 +50,7 @@ export default {
       return {
         ...this.$listeners,
         input: ($event) => {
-          let newValueAsNumber = this.$refs.appInput.$el.querySelector('input').valueAsNumber;
-          let newValueAsDate = new Date(newValueAsNumber);
-
           this.$emit('input', $event);
-          this.$emit('update:valueAsNumber', newValueAsNumber);
-          this.$emit('update:valueAsDate', newValueAsDate);
         },
       };
     },
@@ -124,6 +118,13 @@ export default {
     getDate(value) {
       return new Date(value);
     },
+    inputNative($event) {
+      let newValueAsNumber = $event.target.valueAsNumber;
+      let newValueAsDate = new Date(newValueAsNumber);
+
+      this.$emit('update:valueAsNumber', newValueAsNumber);
+      this.$emit('update:valueAsDate', newValueAsDate);
+    }
   }
 };
 </script>
