@@ -36,11 +36,6 @@ export default {
         this.$emit('change', newValue);
       }
     },
-    attrs() {
-      let attrs = { ...this.$attrs };
-      delete attrs['value'];
-      return attrs;
-    },
     listeners() {
       return {
         ...this.$listeners,
