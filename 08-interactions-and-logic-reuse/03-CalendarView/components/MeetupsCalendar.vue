@@ -3,12 +3,19 @@
     <!-- Каждый митап - ссылка на страницу митапа -->
     <!-- Используя слот требуется вывести список митапов дня в каждой ячейке -->
     <!--
-    <router-link
-      :to="{ name: 'meetup', params: { meetupId: meetup.id } }"
-      class="rangepicker__event"
-      >{{ meetup.title }}</router-link
-    >
     -->
+    <template v-slot="{ year, month, date }">
+      <template v-if="meetupsByDate[year] && meetupsByDate[year][month]">
+        <router-link
+          v-for="meetup in meetupsByDate[year][month][date]"
+          :key="meetup.id"
+          :to="{ name: 'meetup', params: { meetupId: meetup.id } }"
+          class="rangepicker__event"
+          >
+          {{ meetup.title }}</router-link
+        >
+      </template>
+    </template>
   </calendar-view>
 </template>
 
@@ -28,6 +35,40 @@ export default {
   components: {
     CalendarView,
   },
+
+  computed: {
+    // объект с митапами для вывода по датам
+    meetupsByDate() {
+      let meetupsByDate = {};
+
+      // перебор всех митапов для распределения по месяцам и датам
+      this.meetups.forEach((meetup, i) => {
+        let meetupFullDate = new Date(meetup.date);
+        let meetupMonth = meetupFullDate.getMonth();
+        let meetupYear = meetupFullDate.getFullYear();
+        let meetupDate = meetupFullDate.getDate();
+
+        if (!meetupsByDate[meetupYear]) {
+          meetupsByDate[meetupYear] = {};
+        }
+
+        if (!meetupsByDate[meetupYear][meetupMonth]) {
+          meetupsByDate[meetupYear][meetupMonth] = {};
+        }
+
+        if (!meetupsByDate[meetupYear][meetupMonth][meetupDate]) {
+          meetupsByDate[meetupYear][meetupMonth][meetupDate] = [];
+        }
+
+        meetupsByDate[meetupYear][meetupMonth][meetupDate].push({
+          id: meetup.id,
+          title: meetup.title
+        });
+      });
+
+      return meetupsByDate;
+    }
+  }
 };
 </script>
 
