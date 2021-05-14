@@ -3,31 +3,136 @@
     <div class="rangepicker__calendar">
       <div class="rangepicker__month-indicator">
         <div class="rangepicker__selector-controls">
-          <button class="rangepicker__selector-control-left"></button>
-          <div>Январь 2021</div>
-          <button class="rangepicker__selector-control-right"></button>
+          <button
+            @click="changeCurrentMonth(-1)"
+            class="rangepicker__selector-control-left"
+          ></button>
+          <div>{{ localDate }}</div>
+          <button
+            @click="changeCurrentMonth(1)"
+            class="rangepicker__selector-control-right"
+          ></button>
         </div>
       </div>
+
       <div class="rangepicker__date-grid">
-        <div class="rangepicker__cell rangepicker__cell_inactive">28</div>
-        <div class="rangepicker__cell rangepicker__cell_inactive">29</div>
-        <div class="rangepicker__cell rangepicker__cell_inactive">30</div>
-        <div class="rangepicker__cell rangepicker__cell_inactive">31</div>
-        <div class="rangepicker__cell">
-          1
-          <a class="rangepicker__event">Митап</a>
-          <a class="rangepicker__event">Митап</a>
+        <div
+          v-for="day in days"
+          :key="day.id"
+          :class="{
+            rangepicker__cell: true,
+            rangepicker__cell_inactive: !day.active
+          }"
+        >
+          {{ day.day }}
+          <slot :year="currentYear" :month="day.month" :date="day.day"></slot>
         </div>
-        <div class="rangepicker__cell">2</div>
-        <div class="rangepicker__cell">3</div>
       </div>
     </div>
   </div>
 </template>
 
 <script>
+ /**
+  * Возвращает новую дату
+  * @param currentDate - дата (Date) для изменения
+  * @param date - новый день месяца
+  * @param month - новый месяц
+  * @return {Date} - новая дата
+  */
+function setDate(currentDate, date, month) {
+  let newDate = new Date(currentDate);
+
+  if (month !== undefined) {
+    return new Date(newDate.setMonth(month, date));
+  }
+
+  return new Date(newDate.setDate(date));
+}
+
 export default {
   name: 'CalendarView',
+
+  // В качестве локального состояния требуется хранить что-то,
+  // что позволит определить текущий показывающийся месяц.
+  // Изначально должен показываться текущий месяц
+  data() {
+    return {
+      // за изначальное состояния взята текущая дата
+      currentDate: new Date(),
+    };
+  },
+
+  // Вычислимые свойства помогут как с получением списка дней, так и с выводом информации
+  computed: {
+    // просматриваемый год
+    currentYear() {
+      return this.currentDate.getFullYear();
+    },
+    // просматриваемый месяц
+    currentMonth() {
+      return this.currentDate.getMonth();
+    },
+    // день недели первого дня текущего месяца
+    firstDayOfCurrentMonth() {
+      let date = setDate(this.currentDate, 1);
+      return date.getDay() || 7;
+    },
+    // день недели последнего дня текущего месяца
+    lastDayOfCurrentMonth() {
+      let date = setDate(this.currentDate, 0, this.currentMonth + 1);
+      return date.getDay() || 7;
+    },
+    // дни предыдущего месяца
+    daysPrevMonth() {
+      const endDay = setDate(this.currentDate, 0).getDate();
+      const startDay = endDay - (this.firstDayOfCurrentMonth - 1) + 1;
+      return this.getDatesOfMonth(startDay, endDay, this.currentMonth - 1);
+    },
+    // дни текущего месяца
+    daysCurrentMonth() {
+      const lastDayOfMonth = setDate(this.currentDate, 0, this.currentMonth + 1).getDate();
+      return this.getDatesOfMonth(1, lastDayOfMonth, this.currentMonth);
+    },
+    // дни следующего месяца
+    daysNextMonth() {
+      return this.getDatesOfMonth(1, 7 - this.lastDayOfCurrentMonth, this.currentMonth + 1);
+    },
+    // все дни для вывода календаря
+    days() {
+      return [...this.daysPrevMonth, ...this.daysCurrentMonth, ...this.daysNextMonth];
+    },
+    // дата для вывода на страницу
+    localDate() {
+      return this.currentDate.toLocaleString(navigator.language, {
+        month: 'long',
+        year: 'numeric',
+      })
+    }
+  },
+
+  // Методы понадобятся для переключения между месяцами
+  methods: {
+    // изменить текущий месяц
+    changeCurrentMonth(diffMonth) {
+      this.currentDate = setDate(this.currentDate, 1, this.currentMonth + diffMonth);
+    },
+    // получить массив дат для вывода
+    getDatesOfMonth(startDate, endDate, month) {
+      let days = [];
+
+      for (let i = startDate; i <= endDate; i++) {
+        days.push({
+          id: `${month}_${i}`,
+          month: month,
+          day: i,
+          active: month === this.currentMonth
+        });
+      }
+
+      return days;
+    }
+  }
 };
 </script>
 
